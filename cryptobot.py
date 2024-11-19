@@ -1,5 +1,6 @@
 import aiohttp
 import asyncio
+from config import API_KEY
 BASE_URL = " https://pay.crypt.bot/api/"
 
 async def create_payment(crypto: str, amount_rub: float):

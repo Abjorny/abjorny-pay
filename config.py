@@ -1,5 +1,10 @@
-token = "7607390972:AAGqHKWvU3zBP_YwN-9bGEdNvTrbnKu1pj4"
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+API_KEY = os.getenv("API_KEY")
 def TextsList (key:str,values = {}) -> str:
     texts = {
         "start-text":f"*Привет, {values.get('username','')}!\nЭто бот для рассылки эксклюзивного контента по криптовалюте, чтобы начать получать посты, купите подписку в профиле.*",
