@@ -1,6 +1,5 @@
 import aiohttp
 import asyncio
-API_KEY = "295107:AAJqnHeTIWWI8a0jJvAf67TURYRqQ1yxbwu"
 BASE_URL = " https://pay.crypt.bot/api/"
 
 async def create_payment(crypto: str, amount_rub: float):
@@ -54,7 +53,7 @@ async def get_available_currencies():
             async with session.get(
                 f"{BASE_URL}getCurrencies",
                 headers={"Crypto-Pay-API-Token": API_KEY},
-                timeout=10  # Установить таймаут
+                timeout=10 
             ) as response:
                 if response.status == 200:
                     currencies_data = await response.json()
