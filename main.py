@@ -8,7 +8,7 @@ import config
 
 logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=config.token)
+bot = Bot(token=config.TELEGRAM_BOT_TOKEN)
 
 async def main():
 
