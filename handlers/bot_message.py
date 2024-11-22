@@ -1,5 +1,5 @@
 from keyboards import  fabric
-from aiogram import  Router,F
+from aiogram import  Router,F,Bot
 from aiogram.filters import Command
 from aiogram.types import Message
 import db
@@ -28,18 +28,24 @@ async def send_welcome(message : Message):
 
     )
 @router.message(F.text & (F.text.lower() != ""))
-async def send_welcome(message : Message):
+async def send_welcome(message : Message,bot:Bot):
     if str(message.chat.id)[0] == "-":
         users = db.get_users_with_timesub()
         for user in users:
             try:
                 date_pay = user[2]
-                date_format = '%m.%d.%Y'  
-                parsed_date = datetime.datetime.strptime(date_pay, date_format)
-                current_date = datetime.datetime.now()
-                if parsed_date >= current_date:
-                    await message.forward(chat_id=user[1])
-                elif parsed_date < current_date:
-                    db.set_user_timesub(user[1],None)
+                if date_pay is not None:
+                    date_format = '%m.%d.%Y'  
+                    parsed_date = datetime.datetime.strptime(date_pay, date_format)
+                    current_date = datetime.datetime.now()
+                    if parsed_date >= current_date:
+                        await message.forward(chat_id=user[1])
+                    elif parsed_date < current_date:
+                        await bot.send_message(
+                            chat_id=user[1],
+                            text="У вас закончилась подписка, продлите пожалуйста."
+                        )
+                        db.set_user_timesub(user[1],None)
+                        
             except:
                 pass
