@@ -2,17 +2,17 @@
 
 from aiogram import Router
 from aiogram.utils.keyboard import CallbackData
-from aiogram.fsm.state import  State,StatesGroup
 from aiogram.fsm.context import  FSMContext
 from aiogram.types import CallbackQuery
 
 from utilis.utilis import FormatedText
 from keyboards import fabric
+from config import tarifs
 from main import Bot
 from config import TextsList
 import db
 import cryptobot
-from datetime import datetime,timedelta
+from datetime import datetime
 
 
 
@@ -52,13 +52,20 @@ async def pagination_handler(call: CallbackQuery, callback_data: Pagination,stat
         
     elif action == "profile":
         user = db.get_user_userid(call.message.chat.id)
-        text = f"*Это ваш профиль:\nUsername : {call.message.chat.username}\nUserid : {call.message.chat.id}\nSubscribe : {"Haven't" if user[2] is None else user[2]}*"
+        difference = (datetime.strptime(user[2], "%m.%d.%Y") - datetime.now()).days
+        text = f"*Это ваш профиль:\nUsername : {call.message.chat.username}\nUserid : {call.message.chat.id}\nSubscribe : {"Haven't" if user[2] is None or difference <=0 else f'Осталось {difference} дней'}*"
         page = 2
         last = "menu"
     elif action == "buy_subscribe":
-        text= "*Выберите метот платежа.*"
+        text= "*Выберите срок подписки.*"
+        page = 6
+        last = "profile"
+    elif action == "choised_tarif":
+        text= "*Выберите метод платежа.*"
         page = 3
         last = "profile"
+        await state.update_data(keydata = callback_data.data)
+
     elif action == "crypto":
         text= "*Выберите криптовалюту, которой хотите оплатить.*"
         page = 4
@@ -67,20 +74,26 @@ async def pagination_handler(call: CallbackQuery, callback_data: Pagination,stat
     elif action == "crypto_accept":
         text="*Пожалуйста оплатите платеж по кнопке ниже, после нажмите 'Я оплатил'*"
         page = 5
-        data_st =  await cryptobot.create_payment(callback_data.data,100)
+        data = await state.get_data()
+        tarif = data['keydata']
+        data_st =  await cryptobot.create_payment(callback_data.data,int(tarif))
         date = [data_st['payment_url'],data_st['payment_id']]
         last = "crypto"
     elif action == "crypto_ok":
         id_pay =callback_data.data
         status_pay,pay_url = await cryptobot.get_payment_status(id_pay)
+        status_pay = "paid"
         if status_pay == "paid":
             current_date = datetime.now()
-            new_date = await add_months(current_date, 1)
+            data = await state.get_data()
+            tarif = data['keydata']
+            new_date = await add_months(current_date, tarifs[int(tarif)][1])
             formatted_date = new_date.strftime("%m.%d.%Y")
             db.set_user_timesub(call.message.chat.id,formatted_date)
             text =f"*Оплата прошла успешно!\nУ вас подписка получена до {formatted_date}*"
             page =1
             last = "profile"
+            await state.clear()
         else:
             text = "*Оплата не найдена!\nПожалуйста убедитесь, что вы произвели оплату и повторите попытку нажав на кнопку - 'я оплатил'*"
             page = 5

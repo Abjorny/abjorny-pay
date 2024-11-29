@@ -12,7 +12,7 @@ async def create_payment(crypto: str, amount_rub: float):
             ) as response:
                 rate_data = await response.json()
                 for rate in rate_data.get("result", []):
-                            if rate.get("is_crypto") and rate.get("is_valid") and rate.get("source") == crypto and rate.get("target") == "RUB":
+                            if rate.get("is_crypto") and rate.get("is_valid") and rate.get("source") == crypto and rate.get("target") == "USD":
                                 rate_price = rate.get('rate')
                                 crypto_amount = round(amount_rub / float(rate_price), 8)
                                 async with session.post(

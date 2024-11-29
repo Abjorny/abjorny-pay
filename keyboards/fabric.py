@@ -1,6 +1,9 @@
 
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from config import tarifs
+
+
 
 def pagination(page: int=0,id: int=1,last:str='',elem: list=None):
     
@@ -60,6 +63,18 @@ def pagination(page: int=0,id: int=1,last:str='',elem: list=None):
             text="Я оплатил",
             callback_data=Pagination(action="crypto_ok", page=page, last=last, data=f'{elem[1]}')
         )
+        build.button(
+            text="◀назад",
+            callback_data=Pagination(action=last, page=page, last=last, data='')
+        )
+        build.adjust(1) 
+    elif page ==6:
+        for key, value in tarifs.items():
+            print(key)
+            build.button(
+                text=f"{value[0]}",
+                callback_data=Pagination(action='choised_tarif', page=page, last=last, data=f'{key}')
+            )
         build.button(
             text="◀назад",
             callback_data=Pagination(action=last, page=page, last=last, data='')
